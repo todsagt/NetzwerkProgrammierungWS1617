@@ -1,0 +1,10 @@
+//
+// Created by todsagt on 19.10.16.
+//
+
+#ifndef NETZWERKPROGRAMMIERUNGWS1617_SOCKET_H
+#define NETZWERKPROGRAMMIERUNGWS1617_SOCKET_H
+#endif //NETZWERKPROGRAMMIERUNGWS1617_SOCKET_H
+
+
+Socket(int fd, int type, int protocol)
