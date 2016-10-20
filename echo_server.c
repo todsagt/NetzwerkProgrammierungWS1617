@@ -27,48 +27,34 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <unistd.h>
 #include <string.h>
-#include <stdio.h>
+#include "Socket.h"
 
 #define BUFFER_SIZE (1<<16)
 
-int
-main(void)
-{
-	int fd;
-	struct sockaddr_in server_addr, client_addr;
-	socklen_t addr_len;
-	ssize_t len;
-	char buf[BUFFER_SIZE];
+int main(void) {
+    int socket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len;
+    ssize_t len;
+    char buf[BUFFER_SIZE];
 
-	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-		perror("socket");
-	}
+    socket = Socket(AF_INET, SOCK_DGRAM, 0);
 
-	memset((void *) &server_addr, 0, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
+    memset((void *) &server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
 #ifdef HAVE_SIN_LEN
-	server_addr.sin_len = sizeof(struct sockaddr_in);
+    server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
-	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	server_addr.sin_port = htons(7);
-	if (bind(fd, (const struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
-		perror("bind");
-	}
-
-	for (;;) {
-		addr_len = (socklen_t) sizeof(client_addr);
-		memset((void *) &client_addr, 0, sizeof(client_addr));
-		len = recvfrom(fd, (void *) buf, sizeof(buf), 0, (struct sockaddr *) &client_addr, &addr_len);
-		if (len < 0) {
-			perror("recvfrom");
-		} else {
-			sendto(fd, (const void *) buf, (size_t)len, 0, (struct sockaddr *)&client_addr, addr_len);
-		}
-	}
-	if (close(fd) < 0)
-		perror("close");
-
-	return(0);
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port = htons(7);
+    Bind(socket, (const struct sockaddr *) &server_addr, sizeof(server_addr));
+    for (;;) {
+        addr_len = (socklen_t) sizeof(client_addr);
+        memset((void *) &client_addr, 0, sizeof(client_addr));
+        len = Recvfrom(socket, (void *) buf, sizeof(buf), 0, (struct sockaddr *) &client_addr, addr_len);
+        Sendto(socket, (const void *) buf, (size_t) len, 0, (struct sockaddr *) &client_addr, addr_len);
+    }
+    Close(socket);
+    return(0);
 }

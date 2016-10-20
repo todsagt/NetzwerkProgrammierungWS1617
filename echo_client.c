@@ -25,54 +25,75 @@
  */
 
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include "Socket.h"
 
 #define BUFFER_SIZE  (1<<16)
 #define MESSAGE_SIZE (9216)
 
-int
-main(int argc, char **argv)
-{
-	int fd;
-	struct sockaddr_in server_addr, client_addr;
-	socklen_t addr_len;
-	ssize_t len;
-	char buf[BUFFER_SIZE];
+int main(int argc, char **argv) {
+    int connected = 1;
+    if (connected == 0) {
+        int socket;
+        struct sockaddr_in server_addr, client_addr;
+        ssize_t len;
+        socklen_t addr_len;
+        char buf[BUFFER_SIZE];
 
-	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-		perror("socket");
-	}
-
-	memset(&server_addr, 0, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
+        socket = Socket(AF_INET, SOCK_DGRAM, 0);
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
 #ifdef HAVE_SIN_LEN
-	server_addr.sin_len = sizeof(struct sockaddr_in);
+        server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
-	server_addr.sin_port = htons(7);
-	if ((server_addr.sin_addr.s_addr = (in_addr_t)inet_addr(argv[1])) == INADDR_NONE) {
-		fprintf(stderr, "Invalid address\n");
-	}
+        server_addr.sin_port = htons(7);
+        if ((server_addr.sin_addr.s_addr = (in_addr_t) inet_addr(argv[1])) == INADDR_NONE) {
+            fprintf(stderr, "Invalid address\n");
+        }
+        memset((void *) buf, 'A', sizeof(buf));
+        Sendto(socket, (const void *) buf, (size_t) MESSAGE_SIZE, 0, (const struct sockaddr *) &server_addr,
+               sizeof(server_addr));
 
-	memset((void *) buf, 'A', sizeof(buf));
-	if (sendto(fd, (const void *) buf, (size_t) MESSAGE_SIZE, 0, (const struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
-		perror("sendto");
-	}
+        addr_len = (socklen_t) sizeof(client_addr);
+        memset((void *) buf, 0, sizeof(buf));
+        len = Recvfrom(socket, (void *) buf, sizeof(buf), 0, (struct sockaddr *) &client_addr, addr_len);
+        printf("Received %zd bytes from %s.\n", len, inet_ntoa(server_addr.sin_addr));
+        Close(socket);
+        return (0);
+    } else if (connected == 1) {
+        // vars
+        int socket;
+        struct sockaddr_in server_addr;
+        char buf[BUFFER_SIZE];
+        ssize_t len;
 
-	addr_len = (socklen_t) sizeof(client_addr);
-	memset((void *) buf, 0, sizeof(buf));
-	if ((len = recvfrom(fd, (void *) buf, sizeof(buf), 0, (struct sockaddr *) &client_addr, &addr_len)) < 0) {
-		perror("recvfrom");
-	} else {
-		printf("Received %zd bytes from %s.\n", len, inet_ntoa(client_addr.sin_addr));
-	}
-	if (close(fd) < 0) {
-		perror("close");
-	}
+        // socket call
+        socket = Socket(AF_INET, SOCK_DGRAM, 0);
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
+#ifdef HAVE_SIN_LEN
+        server_addr.sin_len = sizeof(struct sockaddr_in);
+#endif
+        server_addr.sin_port = htons(7);
+        if ((server_addr.sin_addr.s_addr = (in_addr_t) inet_addr(argv[1])) == INADDR_NONE) {
+            fprintf(stderr, "Invalid address\n");
+        }
 
-	return(0);
+        // connect call
+        Connect(socket, (const struct sockaddr *) &server_addr, sizeof(server_addr));
+        // send call
+        memset((void *) buf, 'A', sizeof(buf));
+        len = Send(socket, buf, sizeof(buf), 0);
+        printf("Send %zd bytes to %s.\n", len, inet_ntoa(server_addr.sin_addr));
+        // recv call
+        len = Recv(socket, buf, sizeof(buf),0);
+        printf("Received %zd bytes from %s.\n", len, inet_ntoa(server_addr.sin_addr));
+        // close call
+        Close(socket);
+        return (0);
+    }
 }
