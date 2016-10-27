@@ -47,13 +47,13 @@ int main(void) {
     server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_addr.sin_port = htons(7);
+    server_addr.sin_port = htons(2500); // 2500 for executing without root, 7 otherwise
     Bind(socket, (const struct sockaddr *) &server_addr, sizeof(server_addr));
     for (;;) {
         addr_len = (socklen_t) sizeof(client_addr);
         memset((void *) &client_addr, 0, sizeof(client_addr));
         len = Recvfrom(socket, (void *) buf, sizeof(buf), 0, (struct sockaddr *) &client_addr, addr_len);
-        Sendto(socket, (const void *) buf, (size_t) len, 0, (struct sockaddr *) &client_addr, addr_len);
+	Sendto(socket, (const void *) buf, (size_t) len, 0, (struct sockaddr *) &client_addr, addr_len);
     }
     Close(socket);
     return(0);

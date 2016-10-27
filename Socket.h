@@ -20,4 +20,5 @@ int Accept(int socket, struct sockaddr* addr, socklen_t *len);
 int Listen(int socket, int backlog);
 ssize_t Sendto(int socket, const void *buf, size_t buf_len, int flags, const struct sockaddr *to, socklen_t addr_len);
 ssize_t Send(int fd, void *buf, size_t buflen, int flags);
+ssize_t Write(int sock, const void *buf, size_t buf_len);
 int Close(int socket);

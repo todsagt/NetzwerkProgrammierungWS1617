@@ -120,6 +120,16 @@ ssize_t Send(int socket, void *buf, size_t buf_len, int flags) {
     return(len);
 }
 
+ssize_t Write(int sock, const void *buf, size_t buf_len) {
+
+    ssize_t len;
+    if ((len=write(sock, buf, buf_len)) == -1) {
+	perror("write");
+	exit(-1);
+    }
+    return(len);
+}
+
 int Close(int socket) {
     // Wraps the close call in for error handling
     if (close(socket) < 0) {

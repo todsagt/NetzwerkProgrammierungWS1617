@@ -25,6 +25,7 @@
  */
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
 #ifdef HAVE_SIN_LEN
         server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
-        server_addr.sin_port = htons(7);
+        server_addr.sin_port = htons(2500); // 2500 for executing without root, 7 otherwise
         if ((server_addr.sin_addr.s_addr = (in_addr_t) inet_addr(argv[1])) == INADDR_NONE) {
             fprintf(stderr, "Invalid address\n");
         }
@@ -65,7 +66,9 @@ int main(int argc, char **argv) {
         printf("Received %zd bytes from %s\n", len, inet_ntoa(server_addr.sin_addr));
         Close(socket);
         return (0);
-    } else if (connected == 1) {
+
+
+    } else if (connected == 1) { //connected UDP Socket
         // vars
         int socket;
         struct sockaddr_in server_addr;
@@ -79,7 +82,7 @@ int main(int argc, char **argv) {
 #ifdef HAVE_SIN_LEN
         server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
-        server_addr.sin_port = htons(7);
+        server_addr.sin_port = htons(2500);
         if ((server_addr.sin_addr.s_addr = (in_addr_t) inet_addr(argv[1])) == INADDR_NONE) {
             fprintf(stderr, "Invalid address\n");
         }
