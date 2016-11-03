@@ -40,11 +40,11 @@ int main(int argc, char **argv)
         connfd = Accept(sock, (struct sockaddr *) NULL, NULL);
         ticks = time(NULL);
         snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));
-	write(connfd, buff, strlen(buff));
-	shutdown(connfd, SHUT_WR);
-	size = Read(sock, buff, sizeof(buff));
-	// für connfd so lange read machen (schleife) bis read == 0
-	if (size == 0)
+	    Write(connfd, buff, strlen(buff));
+	    shutdown(connfd, SHUT_WR);
+        while(size > 0) {
+            size = Read(sock, buff, sizeof(buff));
+        }
 	    shutdown(connfd, SHUT_RD);
         Close(connfd);
     }

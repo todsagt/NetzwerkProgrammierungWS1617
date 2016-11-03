@@ -49,12 +49,12 @@ int main(int argc, char **argv) {
     server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
     if (argc < 2) { // get port
-	fprintf(stderr, "No Port given..\n");
+	fprintf(stderr, "Adress and Port needed..\n");
 	exit(-1);
     }
     server_addr.sin_port = htons(atoi(argv[2]));
     if (argc < 1) { // get adress
-	fprintf(stderr, "No Adress given..\n");
+	fprintf(stderr, "No Port given..\n");
 	exit(-1);
     }
     if ((server_addr.sin_addr.s_addr = (in_addr_t) inet_addr(argv[1])) == INADDR_NONE) {
@@ -78,8 +78,8 @@ int main(int argc, char **argv) {
 	    // solange read 0 -> shutdown, sonst send 
 	    size = Read(0, buf, sizeof(buf));
 	    if (size == 0) {
-		shutdown(sock, SHUT_RD);
-		FD_CLR(0,&sock_set);
+		    shutdown(sock, SHUT_RD);
+		    FD_CLR(0,&sock_set);
 	    } else {
 	        Send(sock, (void *) buf, size, 0);	// senden
 	    }
