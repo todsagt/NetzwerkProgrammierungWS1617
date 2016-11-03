@@ -39,6 +39,12 @@
 
 int main(int argc, char **argv) {
     int connected = 1;
+    /*
+     * Bei einem Connectet UDP-Socket, verbindet man sich fest mit einen Kommunikationspartner
+     * und muss somit beim Senden oder Empfangen keine Adresse mehr angeben. Die Funktionen
+     * send(..) und recv(..9 verhalten sich ansonsen analog zu sento(..) und recvf(..). Weiterhin
+     * bietet der Connectet UDP-Socket den Vorteil ICMP Nachrichten verarbeiten zu können.
+     */
     if (connected == 0) {
         int socket;
         struct sockaddr_in server_addr, client_addr;

@@ -28,6 +28,7 @@ void onClose(int dummy) {
 }
 
 int main(int argc, char **argv) {
+    //vars
     char buf[BUFFER_SIZE];
     struct sockaddr_in server_addr;
     int sock;
@@ -36,25 +37,26 @@ int main(int argc, char **argv) {
     fd_set read_set;
     //sock
     sock = Socket(AF_INET,SOCK_STREAM,0);
+    //init
     FD_ZERO(&sock_set);
     FD_ZERO(&read_set);
     FD_SET(0,&sock_set);
     FD_SET(sock,&sock_set);
-
     signal(SIGINT, onClose);
     memset(&server_addr, 0, sizeof(server_addr));
     memset(&buf, 0, sizeof(buf));
+    //adress
     server_addr.sin_family = AF_INET;
 #ifdef HAVE_SIN_LEN
     server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
-    if (argc < 2) { // get port
-	fprintf(stderr, "Adress and Port needed..\n");
+    if (argc == 2) { // get port
+	fprintf(stderr, "No Port given..\n");
 	exit(-1);
     }
     server_addr.sin_port = htons(atoi(argv[2]));
-    if (argc < 1) { // get adress
-	fprintf(stderr, "No Port given..\n");
+    if (argc == 1) { // get adress
+	fprintf(stderr, "Adress and Port not given..\n");
 	exit(-1);
     }
     if ((server_addr.sin_addr.s_addr = (in_addr_t) inet_addr(argv[1])) == INADDR_NONE) {
@@ -66,16 +68,16 @@ int main(int argc, char **argv) {
     while(1) {
 	read_set = sock_set;
 	Select(sock+1,&read_set,NULL,NULL,NULL);
-	if(FD_ISSET(sock, &read_set)){ 			// socket lesbar? 
+	if(FD_ISSET(sock, &read_set)){ 			    // socket lesbar?
 	    size = Recv(sock, (void *) buf, (size_t) sizeof(buf),0);
 	    if (size == 0)
 		break;
 	    else
-	    	Write(1, buf, size);				// ausgeben
+	    	Write(1, buf, size);			    // ausgeben
 	}
 
-	if(FD_ISSET(0,&read_set)) {			// stdin lesbar?
-	    // solange read 0 -> shutdown, sonst send 
+	if(FD_ISSET(0,&read_set)) {			        // stdin lesbar?
+	    // solange read 0 -> shutdown, sonst send
 	    size = Read(0, buf, sizeof(buf));
 	    if (size == 0) {
 		    shutdown(sock, SHUT_RD);
@@ -89,12 +91,3 @@ int main(int argc, char **argv) {
     Close(sock);
     return 0;
 }
-
-
-
-
-
-
-
-
-
