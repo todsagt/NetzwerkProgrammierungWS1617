@@ -15,7 +15,7 @@
 
 int main(int argc, char **argv)
 {
-    int sock, connfd;
+    int sock, tmpsock;
     fd_set sock_set;
     struct sockaddr_in server_addr;
     char buff[1000];
@@ -37,16 +37,16 @@ int main(int argc, char **argv)
     Bind(sock, (struct sockaddr *) &server_addr, sizeof(server_addr));
     Listen(sock, 8);
     while (1) {
-        connfd = Accept(sock, (struct sockaddr *) NULL, NULL);
+        tmpsock = Accept(sock, (struct sockaddr *) NULL, NULL);
         ticks = time(NULL);
         snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));
-	    Write(connfd, buff, strlen(buff));
-	    shutdown(connfd, SHUT_WR);
+	    Write(tmpsock, buff, strlen(buff));
+	    shutdown(tmpsock, SHUT_WR);
         while(size > 0) {
             size = Read(sock, buff, sizeof(buff));
         }
-	    shutdown(connfd, SHUT_RD);
-        Close(connfd);
+	    shutdown(tmpsock, SHUT_RD);
+        Close(tmpsock);
     }
     Close(sock);
     return 0;
