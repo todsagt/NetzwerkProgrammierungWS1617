@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 	if(FD_ISSET(sock, &read_set)){ 			    // socket lesbar?
 	    size = Recv(sock, (void *) buf, (size_t) sizeof(buf),0);
 	    if (size == 0)
-		break;
+		    break;
 	    else
 	    	Write(1, buf, size);			    // ausgeben
 	}

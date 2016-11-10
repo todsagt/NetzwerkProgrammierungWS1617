@@ -7,26 +7,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Socket.h"
-#include "threadpool.h" // du geile Sau!
+#include "pthread.h"
 
-#define MAXTHREADS 4
-#define MAXQUEUE 16
-
-void echo(void *arg) {
+void *echo(void *arg) {
     char buff[1000];
     ssize_t recv = 1;
-    ssize_t send = 1;
-    int tmpsock = (int) arg;
-    size_t bufflen = sizeof(buff);
+    ssize_t send = 0;
+    int tmpsock = *((int*) arg);
+    free(arg);
     while (recv > 0) {
-        recv = Recv(tmpsock, buff, bufflen, 0);
-        while (send /= recv) {
+        memset(buff, 0, sizeof(buff));
+        recv = Recv(tmpsock, buff, sizeof(buff), 0);
+        while (send < recv) {
             // wenn send nicht direkt alles empfangene weiter schickt
-            send += Send(tmpsock, buff, bufflen, 0);
+            send += Send(tmpsock, buff, (recv-send), 0);
             // wird solange weiter geschickt, bis gesendet = empfangen
         }
     }
     Close(tmpsock);
+    return NULL;
 }
 
 int main(int argc, char **argv) {
@@ -34,11 +33,9 @@ int main(int argc, char **argv) {
     fd_set sock_set;
     struct sockaddr_in server_addr, client_addr;
     socklen_t len;
-
-    threadpool_t *thpool = threadpool_create(MAXTHREADS, MAXQUEUE, 0);
+    pthread_t thread;
 
     FD_ZERO(&sock_set);
-
     sock = Socket(AF_INET, SOCK_STREAM, 0);
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const void *) 1, sizeof(int));
 
@@ -51,8 +48,11 @@ int main(int argc, char **argv) {
     server_addr.sin_port = htons(2500);
     Bind(sock, (struct sockaddr *) &server_addr, sizeof(server_addr));
     Listen(sock, 8);
+    printf("Listen\n");
     while (1) {
+        printf("Pre Select\n");
         Select(sockmax + 1, &sock_set, NULL, NULL, NULL);
+        printf("Post Select\n");
         for (i = 0; i <= sockmax; i++) {
             if (FD_ISSET(i, &sock_set)) {
                 if (i == sock) { //neue verbindung
@@ -63,13 +63,15 @@ int main(int argc, char **argv) {
                         sockmax = tmpsock; // neue sockmax
 
                 } else { // daten von clienten bearbeiten
-                    threadpool_add(thpool, echo, &i, 0); // i an threadpool geben zum abarbeiten
+                    void *ptr = malloc(sizeof(int));
+                    *((int*)ptr) = i;
+                    pthread_create(&thread, NULL, echo, ptr); // i an thread geben zum abarbeiten
+                    pthread_detach(thread);
                     FD_CLR(i, &sock_set); // i aus dem FD_Set nehmen
                 }
             }
         }
     }
     Close(sock);
-    threadpool_destroy(thpool, 0);
     return 0;
 }

@@ -64,7 +64,7 @@ ssize_t Recvfrom(int socket, void *buf, size_t buflen, int flags, struct sockadd
 ssize_t Recv(int socket, void *buf, size_t buflen, int flags) {
     // Wraps the recv call in for error handling
     ssize_t len;
-    if ((len = recv(socket, (void *) buf, buflen, flags)) == -1) {
+    if ((len = recv(socket, buf, buflen, flags)) == -1) {
         perror("recv");
         exit(-1);
     }
