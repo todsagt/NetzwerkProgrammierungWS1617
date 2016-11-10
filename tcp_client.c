@@ -20,13 +20,6 @@
 #define BUFFER_SIZE  (1<<16)
 #define MESSAGE_SIZE (9216)
 
-int sock;
-
-void onClose(int dummy) {
-    shutdown(sock,SHUT_WR);
-    exit(0);
-}
-
 int main(int argc, char **argv) {
     //vars
     char buf[BUFFER_SIZE];
@@ -42,7 +35,6 @@ int main(int argc, char **argv) {
     FD_ZERO(&read_set);
     FD_SET(0,&sock_set);
     FD_SET(sock,&sock_set);
-    signal(SIGINT, onClose);
     memset(&server_addr, 0, sizeof(server_addr));
     memset(&buf, 0, sizeof(buf));
     //adress
