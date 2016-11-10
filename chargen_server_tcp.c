@@ -8,19 +8,33 @@
 #include <string.h>
 #include "Socket.h"
 #include "pthread.h"
+#include "errno.h"
 
 void *chargen(void *arg) {
     char buff[1000];
     int tmpsock = *((int*) arg);
     free(arg);
+    fd_set read_set;
+    fd_set write_set;
+    FD_ZERO(&read_set);
+    FD_ZERO(&write_set);
+    FD_SET(tmpsock,&read_set);
+    FD_SET(tmpsock,&write_set);
     size_t recv = 0;
-    size_t send = 0;
+    //size_t send = 0;
     char data[54] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\0";
     while(1) {
-        send = Send(tmpsock,data,sizeof(data),0);
-        printf("Send %d bytes\n",(int)send);
-        recv = Recv(tmpsock,buff,sizeof(buff),0); //ab ins nirvana
-        printf("Recieved and thrown away %d bytes\n",(int)recv);
+        Select(tmpsock+1,&read_set,&write_set,NULL,NULL);
+        if(FD_ISSET(tmpsock,&write_set)) {
+            if(/*send = */send(tmpsock, data, sizeof(data), 0) == -1) {
+                //fprintf(stderr,"send:%s\n",strerror(errno));
+            }
+            //printf("Send %d bytes\n", (int) send);
+        }
+        if(FD_ISSET(tmpsock,&read_set)) {
+            recv = Recv(tmpsock, buff, sizeof(buff), 0); //ab ins nirvana
+            printf("Recieved and thrown away %d bytes\n", (int) recv);
+        }
     }
     Close(tmpsock);
     return NULL;
@@ -35,7 +49,8 @@ int main(int argc, char **argv) {
 
     //FD_ZERO(&sock_set);
     sock = Socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const void *) 1, sizeof(int));
+    setsockopt(sock, SOL_SOCKET, MSG_NOSIGNAL, (const void *) 1, sizeof(int));
+    //SO_NOSIGPIPE auf bsd?
 
     //FD_SET(sock, &sock_set);
     //sockmax = sock;
