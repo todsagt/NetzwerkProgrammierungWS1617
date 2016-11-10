@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
 		    shutdown(sock, SHUT_RD);
 		    FD_CLR(0,&sock_set);
 	    } else {
-	        Send(sock, (void *) buf, size, 0);	// senden
+	        Send(sock, buf, size, 0);	// senden
 	    }
 	}
 

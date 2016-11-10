@@ -64,7 +64,8 @@ ssize_t Recvfrom(int socket, void *buf, size_t buflen, int flags, struct sockadd
 ssize_t Recv(int socket, void *buf, size_t buflen, int flags) {
     // Wraps the recv call in for error handling
     ssize_t len;
-    if ((len = recv(socket, buf, buflen, flags)) == -1) {
+    len = recv(socket, buf, buflen, flags);
+    if (len == -1) {
         perror("recv");
         exit(-1);
     }
@@ -74,7 +75,7 @@ ssize_t Recv(int socket, void *buf, size_t buflen, int flags) {
 ssize_t Read(int socket, void *buf, size_t read_len) {
     // Wraps the read call in for error handling
     ssize_t len;
-    if ((len = read(socket, &buf, read_len)) == -1) {
+    if ((len = read(socket, buf, read_len)) == -1) {
         perror("read");
         exit(-1);
     }
@@ -103,17 +104,17 @@ int Listen(int socket, int backlog) {
 ssize_t Sendto(int socket, const void *buf, size_t buf_len, int flags, const struct sockaddr *client_addr, socklen_t addr_len) {
     // Wraps the sendto call in for error handling
     int len;
-    if((len = sendto(socket, &buf, (size_t) buf_len, flags, client_addr, addr_len)) == -1) {
+    if((len = sendto(socket, buf, (size_t) buf_len, flags, client_addr, addr_len)) == -1) {
         perror("sendto");
         exit(-1);
     }
     return(len);
 }
 
-ssize_t Send(int socket, void *buf, size_t buf_len, int flags) {
+ssize_t Send(int socket, void* buf, size_t buf_len, int flags) {
 
     ssize_t len;
-    if ((len = send(socket, &buf, buf_len, flags)) == -1) {
+    if ((len = send(socket, buf, buf_len, flags)) == -1) {
         perror("send");
         exit(-1);
     }

@@ -12,35 +12,38 @@
 void *echo(void *arg) {
     char buff[1000];
     ssize_t recv = 1;
-    ssize_t send = 0;
+    ssize_t send;
     int tmpsock = *((int*) arg);
     free(arg);
     while (recv > 0) {
         memset(buff, 0, sizeof(buff));
         recv = Recv(tmpsock, buff, sizeof(buff), 0);
+        printf("Daten erhalten\n");
+        send = 0;
         while (send < recv) {
             // wenn send nicht direkt alles empfangene weiter schickt
-            send += Send(tmpsock, buff, (recv-send), 0);
+            send += Send(tmpsock, buff+send, (recv-send), 0); // buff pointer um send verschieben
             // wird solange weiter geschickt, bis gesendet = empfangen
         }
+        printf("Daten gesendet\n");
     }
     Close(tmpsock);
     return NULL;
 }
 
 int main(int argc, char **argv) {
-    int sock, tmpsock, sockmax, i;
-    fd_set sock_set;
+    int sock, tmpsock/*, sockmax, i*/;
+    //fd_set sock_set;
     struct sockaddr_in server_addr, client_addr;
     socklen_t len;
     pthread_t thread;
 
-    FD_ZERO(&sock_set);
+    //FD_ZERO(&sock_set);
     sock = Socket(AF_INET, SOCK_STREAM, 0);
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const void *) 1, sizeof(int));
 
-    FD_SET(sock, &sock_set);
-    sockmax = sock;
+    //FD_SET(sock, &sock_set);
+    //sockmax = sock;
 
     memset((void *) &server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -50,27 +53,29 @@ int main(int argc, char **argv) {
     Listen(sock, 8);
     printf("Listen\n");
     while (1) {
-        printf("Pre Select\n");
-        Select(sockmax + 1, &sock_set, NULL, NULL, NULL);
-        printf("Post Select\n");
-        for (i = 0; i <= sockmax; i++) {
-            if (FD_ISSET(i, &sock_set)) {
-                if (i == sock) { //neue verbindung
+        //printf("Pre Select\n");
+        //Select(sockmax + 1, &sock_set, NULL, NULL, NULL);
+        //printf("Post Select\n");
+        //for (i = 0; i <= sockmax; i++) {
+            //if (FD_ISSET(i, &sock_set)) {
+                //if (i == sock) { //neue verbindung
                     len = sizeof(client_addr);
                     tmpsock = Accept(sock, (struct sockaddr *) &client_addr, &len); //fd für neue Verbindung
-                    FD_SET(tmpsock, &sock_set); // neue Verbindung ins fd-array
-                    if (tmpsock > sockmax)
-                        sockmax = tmpsock; // neue sockmax
+                    printf("Neue Verbindung\n");
+                //    FD_SET(tmpsock, &sock_set); // neue Verbindung ins fd-array
+                //    if (tmpsock > sockmax)
+                //        sockmax = tmpsock; // neue sockmax
 
-                } else { // daten von clienten bearbeiten
+                //} else { // daten von clienten bearbeiten
                     void *ptr = malloc(sizeof(int));
-                    *((int*)ptr) = i;
+                //    *((int*)ptr) = i;
+                    *((int*)ptr) = tmpsock;
                     pthread_create(&thread, NULL, echo, ptr); // i an thread geben zum abarbeiten
                     pthread_detach(thread);
-                    FD_CLR(i, &sock_set); // i aus dem FD_Set nehmen
-                }
-            }
-        }
+                //    FD_CLR(i, &sock_set); // i aus dem FD_Set nehmen
+                //}
+            //}
+        //}
     }
     Close(sock);
     return 0;

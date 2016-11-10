@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     while (1) {
         printf("Pre Select\n");
         Select(sockmax+1,&sock_set, NULL, NULL, NULL);
-        printf(" Post Select\n");
+        printf("Post Select\n");
         for(i=0;i <= sockmax;i++) {
             if (FD_ISSET(i,&sock_set)) {
                 if(i == sock) { //neue verbindung
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
                     size = 1;
                     while( size > 0) {                          // schmeiß weg
                         size = Recv(i, buff, sizeof(buff), 0);  // lass liegen, tritt sich fest
-                        printf("Daten wegschmeißen: %.*s\n",size,buff);
+                        printf("Daten wegschmeißen: %.*s\n",(int)size,buff);
                     }
                     Close(i);
                     FD_CLR(i,&sock_set);
