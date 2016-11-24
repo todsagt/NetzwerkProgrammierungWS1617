@@ -1,12 +1,12 @@
 AC_INIT(netzwerkprogrammierung_beispiele, 1.2)
-AC_CONFIG_SRCDIR(echo_server_udp.c, echo_client_udp.c, Socket.c, tcp_client.c, daytime_server_tcp.c, discard_server_tcp.c, echo_server_tcp.c, chargen_server_tcp.c)
+AC_CONFIG_SRCDIR(echo_server_udp.c, echo_client_udp.c, Socket.c, tcp_client.c, daytime_server_tcp.c, discard_server_tcp.c, echo_server_tcp.c, chargen_server_tcp.c, server.c, client.c, helper.c, getaddresses.c, chargen.c, daytime.c, discard.c, echo.c)
 AM_INIT_AUTOMAKE
 
 AC_PROG_CC
 
 AC_CANONICAL_HOST
 
-CFLAGS="$CFLAGS -Wall -std=c99 -pedantic -pthread"
+CFLAGS="$CFLAGS -Wall -pedantic -pthread" //-std=c99
 
 case $host_os in
 solaris*)
