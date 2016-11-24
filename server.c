@@ -2,6 +2,7 @@
 // Created by todsagt on 24.11.16.
 //
 
+#include <pthread.h>
 #include "server.h"
 
 int main( int argc, char* argv[] ) {

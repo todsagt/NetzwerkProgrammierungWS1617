@@ -6,7 +6,7 @@ AC_PROG_CC
 
 AC_CANONICAL_HOST
 
-CFLAGS="$CFLAGS -Wall -pedantic -pthread" //-std=c99
+CFLAGS="$CFLAGS -Wall -pedantic -pthread"
 
 case $host_os in
 solaris*)
